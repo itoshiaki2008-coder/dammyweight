@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>附属書[7]浮沈性安定性試験に用いるダミーウェイト</title>
+<style>
+:root{
+  --bg1:#0b1624; --bg2:#152538;
+  --card:#132339cc; --cardborder:#2a4360;
+  --accent:#3ec6e0; --accent2:#4f8ff7;
+  --text:#eef4fb; --textdim:#a9c0d6;
+  --danger:#ff6b6b; --ok:#3ecf8e;
+  --input:#0d1c2c;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:linear-gradient(160deg,var(--bg1),var(--bg2) 60%,#0d1a2a);
+  background-attachment:fixed;
+  color:var(--text);
+  font-family:'Share Tech Mono','Courier New',monospace;
+  min-height:100vh;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+  background-size:28px 28px,28px 28px;
+}
+.wrap{max-width:560px;margin:0 auto;padding:22px 14px 80px;}
+.hero{text-align:center;margin:6px 0 24px;}
+.hero h1{font-size:18px;line-height:1.5;margin:0 0 6px;color:#fff;font-weight:700;letter-spacing:.02em;}
+.hero p{font-size:11.5px;color:var(--textdim);margin:4px 0;line-height:1.7;}
+.step{
+  background:var(--card);
+  border:1px solid var(--cardborder);
+  border-radius:10px;
+  padding:18px 16px;
+  margin-bottom:18px;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.01), 0 8px 24px rgba(0,0,0,0.35);
+}
+.step-head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+.step-num{
+  font-size:11px;color:var(--bg1);background:var(--accent);
+  border-radius:20px;padding:2px 9px;font-weight:700;
+}
+.step-title{font-size:14px;color:#fff;font-weight:700;}
+.step-sub{font-size:11px;color:var(--textdim);margin:0 0 14px;line-height:1.6;}
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:11.5px;color:var(--textdim);margin-bottom:5px;}
+input[type=number],input[type=text],select{
+  width:100%;background:var(--input);border:1px solid var(--cardborder);
+  color:#fff;padding:9px 10px;border-radius:6px;font-size:13px;
+  font-family:inherit;
+}
+input:focus,select:focus{outline:none;border-color:var(--accent);}
+::placeholder{color:#5f7794;}
+.pillgroup{display:flex;gap:8px;flex-wrap:wrap;}
+.pill{
+  border:1px solid var(--cardborder);border-radius:20px;padding:7px 14px;
+  font-size:12px;cursor:pointer;color:var(--textdim);user-select:none;
+  background:var(--input);
+}
+.pill.active{border-color:var(--accent);color:#fff;background:#123049;box-shadow:0 0 0 1px var(--accent) inset;}
+.row{display:flex;gap:8px;}
+.row > *{flex:1;}
+.resultBox{
+  margin-top:16px;border:1px solid var(--cardborder);border-radius:8px;
+  background:var(--input);padding:14px;
+}
+.resultRow{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid rgba(42,67,96,0.5);}
+.resultRow:last-child{border-bottom:none;}
+.resultRow .lbl{font-size:12px;color:var(--textdim);}
+.resultRow .val{font-size:18px;font-weight:700;color:var(--accent);}
+.resultRow .val .unit{font-size:11px;color:var(--textdim);font-weight:400;margin-left:3px;}
+.warn{font-size:11px;color:#f5c26b;background:rgba(245,194,107,0.08);border:1px solid rgba(245,194,107,0.3);padding:8px 10px;border-radius:6px;margin-top:10px;line-height:1.6;}
+.note{font-size:10.5px;color:#5f7794;margin-top:10px;line-height:1.7;}
+.hidden{display:none;}
+.footer-note{font-size:10.5px;color:#5f7794;text-align:center;margin-top:18px;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>附属書[7]<br>浮沈性安定性試験に用いるダミーウェイト</h1>
+    <p>機関の種類・出力、または最大搭載人員を入力すると、試験に用いるダミーウェイトの質量を自動算定します。</p>
+  </div>
+
+  <!-- STEP 1: 表１ 機関質量 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">表１</span><span class="step-title">機関質量によるダミーウェイト</span></div>
+    <div class="step-sub">機関の種類を選択してください。</div>
+
+    <div class="field">
+      <div class="pillgroup" id="engineType">
+        <div class="pill active" data-v="outboard">船外機</div>
+        <div class="pill" data-v="inboard">船内機</div>
+        <div class="pill" data-v="io">船内外機</div>
+        <div class="pill" data-v="battery">バッテリー</div>
+      </div>
+    </div>
+
+    <!-- 船外機／バッテリー 共通：基数＋出力 -->
+    <div id="powerFields">
+      <div class="field">
+        <label>基数</label>
+        <div class="pillgroup" id="engineCount">
+          <div class="pill active" data-v="1">１基</div>
+          <div class="pill" data-v="2">２基掛け（トランサム）</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>出力の単位</label>
+        <div class="pillgroup" id="powerUnit">
+          <div class="pill active" data-v="kw">KW</div>
+          <div class="pill" data-v="ps">PS</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>出力値</label>
+        <input type="number" id="powerValue" step="0.1" min="0" placeholder="例）40">
+      </div>
+    </div>
+
+    <!-- 船内機／船内外機：機関質量入力 -->
+    <div id="massFields" class="hidden">
+      <div class="field">
+        <label>機関質量（kg）</label>
+        <input type="number" id="massValue" step="0.1" min="0" placeholder="例）150">
+      </div>
+    </div>
+
+    <div class="resultBox" id="table1Result"></div>
+  </div>
+
+  <!-- STEP 2: 表２ 人員数 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">表２</span><span class="step-title">人員数によるダミーウェイト</span></div>
+    <div class="step-sub">最大搭載人員を入力してください（浸水状態での人員と備品の荷重を算定します）。</div>
+    <div class="field">
+      <label>最大搭載人員（人）</label>
+      <input type="number" id="personCount" step="1" min="1" placeholder="例）6">
+    </div>
+    <div class="resultBox" id="table2Result"></div>
+  </div>
+
+  <div class="footer-note">
+    出典：小型船舶安全規則 検査事務規程 1編附[7]-3・4　表１・表２<br>
+    本ツールは参考情報です。最終確認は必ず原本・関係機関にお問い合わせください。
+  </div>
+</div>
+
+<script>
+/* ====================== 表１：機関質量によるダミーウェイト ====================== */
+
+/* 船外機（単基）KW帯・出力帯：[kw下限, kw上限(null=上限なし), 水上質量kg, 水没時相当質量kg] */
+const OUTBOARD_SINGLE_KW = [
+  [0,    1.5,  11,  9],
+  [1.5,  3.0,  18, 15],
+  [3.0,  5.0,  27, 24],
+  [5.0,  11.0, 41, 37],
+  [11.0, 18.5, 57, 48],
+  [18.5, 33.5, 77, 65],
+  [33.5, 45.0, 107, 88],
+  [45.0, 60.0, 127, 107],
+  [60.0, 108.0, 183, 160],
+  [108.0, 205.0, 195, 172],
+  [205.0, null, 274, 244]
+];
+const OUTBOARD_SINGLE_PS = [
+  [0,    2.0,  11,  9],
+  [2.0,  4.0,  18, 15],
+  [4.0,  6.7,  27, 24],
+  [6.7,  14.7, 41, 37],
+  [14.7, 24.8, 57, 48],
+  [24.8, 44.9, 77, 65],
+  [44.9, 60.2, 107, 88],
+  [60.2, 80.4, 127, 107],
+  [80.4, 144.7, 183, 160],
+  [144.7, 274.7, 195, 172],
+  [274.7, null, 274, 244]
+];
+/* 船外機（２基掛け用トランサム） */
+const OUTBOARD_TWIN_KW = [
+  [37.0, 67.0, 154, 130],
+  [67.0, 90.0, 213, 177],
+  [90.0, 120.0, 254, 213],
+  [120.0, 215.0, 367, 319],
+  [215.0, 410.0, 390, 344],
+  [410.0, null, 549, 488]
+];
+const OUTBOARD_TWIN_PS = [
+  [49.6, 89.8, 154, 130],
+  [89.8, 120.6, 213, 177],
+  [120.6, 160.8, 254, 213],
+  [160.8, 288.1, 367, 319],
+  [288.1, 549.4, 390, 344],
+  [549.4, null, 549, 488]
+];
+/* バッテリー（単基） */
+const BATTERY_SINGLE_KW = [
+  [0, 5.0, 0.0, 0.0],
+  [5.0, 11.0, 9.0, 5.0],
+  [11.0, null, 20.0, 11.0]
+];
+const BATTERY_SINGLE_PS = [
+  [0, 6.7, 0.0, 0.0],
+  [6.7, 14.7, 9.0, 5.0],
+  [14.7, null, 20.0, 11.0]
+];
+/* バッテリー（２基掛け用トランサム） */
+const BATTERY_TWIN_KW = [
+  [37.0, null, 41.0, 23.0]
+];
+const BATTERY_TWIN_PS = [
+  [49.6, null, 41.0, 23.0]
+];
+
+function lookupRange(table, v) {
+  for (const row of table) {
+    const [lo, hi] = row;
+    if (v >= lo && (hi === null || v < hi)) return row;
+  }
+  return null;
+}
+
+let engineType = 'outboard';
+let engineCount = '1';
+let powerUnit = 'kw';
+
+function renderPowerFieldsVisibility() {
+  const showPower = (engineType === 'outboard' || engineType === 'battery');
+  document.getElementById('powerFields').classList.toggle('hidden', !showPower);
+  document.getElementById('massFields').classList.toggle('hidden', showPower);
+}
+
+function calcTable1() {
+  const box = document.getElementById('table1Result');
+
+  if (engineType === 'inboard' || engineType === 'io') {
+    const mass = parseFloat(document.getElementById('massValue').value);
+    if (isNaN(mass) || mass < 0) { box.innerHTML = ''; return; }
+    const rate = engineType === 'inboard' ? 0.75 : 0.80;
+    const label = engineType === 'inboard' ? '船内機（質量の75%）' : '船内外機（質量の80%）';
+    const result = mass * rate;
+    box.innerHTML = `
+      <div class="resultRow"><span class="lbl">${label}</span><span class="val">${result.toFixed(1)}<span class="unit">kg</span></span></div>
+    `;
+    return;
+  }
+
+  const val = parseFloat(document.getElementById('powerValue').value);
+  if (isNaN(val) || val < 0) { box.innerHTML = ''; return; }
+
+  let table;
+  if (engineType === 'outboard') {
+    table = engineCount === '2'
+      ? (powerUnit === 'kw' ? OUTBOARD_TWIN_KW : OUTBOARD_TWIN_PS)
+      : (powerUnit === 'kw' ? OUTBOARD_SINGLE_KW : OUTBOARD_SINGLE_PS);
+  } else {
+    table = engineCount === '2'
+      ? (powerUnit === 'kw' ? BATTERY_TWIN_KW : BATTERY_TWIN_PS)
+      : (powerUnit === 'kw' ? BATTERY_SINGLE_KW : BATTERY_SINGLE_PS);
+  }
+
+  const row = lookupRange(table, val);
+  if (!row) {
+    box.innerHTML = `<div class="warn">入力された出力に対応する表のデータがありません（原本をご確認ください）。</div>`;
+    return;
+  }
+  const [, , dry, wet] = row;
+  box.innerHTML = `
+    <div class="resultRow"><span class="lbl">水没しない場合の質量</span><span class="val">${dry.toFixed(1)}<span class="unit">kg</span></span></div>
+    <div class="resultRow"><span class="lbl">水没する場合の水中重量に相当する荷重の質量</span><span class="val">${wet.toFixed(1)}<span class="unit">kg</span></span></div>
+  `;
+}
+
+document.querySelectorAll('#engineType .pill').forEach(p => {
+  p.addEventListener('click', () => {
+    engineType = p.dataset.v;
+    document.querySelectorAll('#engineType .pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    renderPowerFieldsVisibility();
+    calcTable1();
+  });
+});
+document.querySelectorAll('#engineCount .pill').forEach(p => {
+  p.addEventListener('click', () => {
+    engineCount = p.dataset.v;
+    document.querySelectorAll('#engineCount .pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    calcTable1();
+  });
+});
+document.querySelectorAll('#powerUnit .pill').forEach(p => {
+  p.addEventListener('click', () => {
+    powerUnit = p.dataset.v;
+    document.querySelectorAll('#powerUnit .pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    calcTable1();
+  });
+});
+document.getElementById('powerValue').addEventListener('input', calcTable1);
+document.getElementById('massValue').addEventListener('input', calcTable1);
+
+/* ====================== 表２：人員数によるダミーウェイト ====================== */
+const PERSON_TABLE = {1:38, 2:75, 3:110, 4:120, 5:130, 6:140, 7:150, 8:160, 9:170, 10:180};
+
+function calcTable2() {
+  const box = document.getElementById('table2Result');
+  const n = parseInt(document.getElementById('personCount').value, 10);
+  if (isNaN(n) || n < 1) { box.innerHTML = ''; return; }
+
+  let load, formula;
+  if (n <= 10) {
+    load = PERSON_TABLE[n];
+    formula = `表の値（${n}人）`;
+  } else {
+    load = 18 * n;
+    formula = `18 × ${n}人`;
+  }
+  box.innerHTML = `
+    <div class="resultRow"><span class="lbl">浸水状態での人員と備品の荷重　<span style="opacity:.6">（${formula}）</span></span><span class="val">${load.toFixed(1)}<span class="unit">kg</span></span></div>
+  `;
+}
+document.getElementById('personCount').addEventListener('input', calcTable2);
+
+renderPowerFieldsVisibility();
+</script>
+</body>
+</html>
